@@ -57,6 +57,7 @@ print('del_index = {}'.format(del_index))
 sys.stdout.flush()
 
 crust = np.full((Nd,Nl), Tinit, dtype='float')
+#crust = np.ones((Nd,Nl), dtype = 'float') * Tinit
 crust[Nd-1] = Tbottom
 
 if ( (dt*alpha/ad**2 > 0.5) or (dt*alpha/al**2 > 0.5)):
@@ -71,17 +72,20 @@ for t in np.arange(ti, tf+dt, dt):
         print('index_low, index_high = ', index_low,index_high)
         sys.stdout.flush()
         for i in range(1, Ntasks):
-            #print('index_low, index_high = ', index_low,index_high)
+            print('index_low, index_high = {},{}'.format( index_low+(i*del_index),index_high+(i*del_index)))
+            sys.stdout.flush()
             #print('Shape of crust sent = {}'.format(np.shape(crust[:, index_low+(i*del_index) : index_high+(i*del_index)])))
             print('size of data sent in bytes  = {}'.format(sys.getsizeof(crust[:, index_low+(i*del_index) : index_high+(i*del_index)])))
             sys.stdout.flush()
-            comm.send(crust[:, index_low+(i*del_index) : index_high+(i*del_index)], dest = i, tag = i)
+            comm.send(crust[:, index_low+(i*del_index) : index_high+(i*del_index)].copy(), dest = i, tag = i)
             
     else:
-        crust_thistask = np.empty((Nd, del_index), dtype = float)
-        print('Shape of crust_thistask = {}'.format(np.shape(crust_thistask)))
+        #crust_thistask = np.full((Nd, del_index),0, dtype = 'float')
+        #print('Size of crust_thistask in bytes = {}'.format(sys.getsizeof(crust_thistask)))
+        #sys.stdout.flush()
+        crust_thistask = comm.recv(source = 0, tag = ThisTask)
+        print('NON-zero elemenst in crust_thistask is {} in task {} = '.format(np.count_nonzero(crust_thistask),ThisTask))
         sys.stdout.flush()
-        comm.recv(crust_thistask, source = 0, tag = ThisTask)
-        print('crust_thistask in task {} = {}'.format(ThisTask,crust_thistask))
+        print('size of data received in bytes  = {}'.format(sys.getsizeof(crust_thistask)))
         sys.stdout.flush()
             
