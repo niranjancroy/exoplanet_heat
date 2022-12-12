@@ -108,6 +108,20 @@ del_index = int(Nl / Ntasks) #For now please provide Ntasks such that del_index 
 #print('del_index = {}'.format(del_index))
 #sys.stdout.flush()
 
+
+# Read in flare info from Vida+2019
+energy = np.genfromtxt('vida+2019_flares.txt', usecols=3, skip_header=2)
+elen = len(energy)
+# Probability of a flare occuring in dt = number of flares / number of dt in 50 days 
+flare_prob = elen / (50/dt)
+
+# energy = np.append(energy, 1e34)
+
+# Ergs in a given dt:
+pcen_energy = 6.03e30 * 24*60*60 * dt
+flare_factor = 4.8*energy / pcen_energy * (Tinit+Tvar+Tday)
+
+
 crust = np.full((Nd,Nl), Tinit, dtype='float')
 #crust = np.ones((Nd,Nl), dtype = 'float') * Tinit
 crust[Nd-1] = Tbottom
@@ -126,9 +140,19 @@ if ( (dt*alpha/ad**2 > 0.5) or (dt*alpha/al**2 > 0.5)):
     print('dt adjusted to {}'.format(dt))
     sys.stdout.flush()
 for t in np.arange(ti, tf+dt, dt):
+    # Randomly choose if a flare happens; if yes, pick from the flare list. 
+    if np.random.rand() < flare_prob:
+        idx = np.random.randint(elen)
+        flare_change = flare_factor[idx]
+        print('Careful, flare at t = %.2f days! id = %i, Tchange = %.2E K '%(
+            t, idx, flare_factor[idx]))
+    else:
+        flare_change = 0
+    
+
     # periodic heating at surface with phase shift (INCORRECT ON SUB-DAY TIMESCALE)
     phase = np.arange(Nl)/Nl
-    crust[0] = Tinit + Tvar*np.sin(2*np.pi*(t/tyear+phase)) + Temp_day*np.sin(2*np.pi*(t/tday + phase))
+    crust[0] = Tinit + Tvar*np.sin(2*np.pi*(t/tyear+phase)) + Temp_day*np.sin(2*np.pi*(t/tday + phase)) + flare_change
 
     crust_thistask = crust[:,index_low:index_high]
     nrow, ncol = np.shape(crust_thistask)
