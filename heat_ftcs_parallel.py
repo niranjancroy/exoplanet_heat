@@ -119,7 +119,7 @@ flare_prob = elen / (50/dt)
 
 # Ergs in a given dt:
 pcen_energy = 6.03e30 * 24*60*60 * dt
-flare_factor = 4.8*energy / pcen_energy * (Tinit+Tvar+Tday)
+flare_factor = 4.8*energy / pcen_energy * (Tinit+Tvar+Temp_day)
 
 
 crust = np.full((Nd,Nl), Tinit, dtype='float')
@@ -303,55 +303,5 @@ for t in np.arange(ti, tf+dt, dt):
             filename = 'test_parallel/tempevolution_plots/proxima_b_test/temp'+str(count).zfill(3)+'.png'
             plot_grid(x,y,z,T, t, filename)
             count += 1
-#    else: #rank == 0
-#        for i in range(1,nrow-1):
-#            for j in range(0,ncol-1):
-#                if ((j-1) < index_low):
-#                    cell_left = comm.irecv(source = Ntasks-1, tag = Ntasks-1)  
-#                    print('Left cell received at task {} of {} from task {}'.format(ThisTask, Ntasks, Ntasks-1))
-#                    sys.stdout.flush()
-#                    cell_right = crust_thistask[i,j+1]
-#                    comm.isend(crust_thistask[i,j], dest = Ntasks-1, tag = 0)
-#                    print('Right cell sent from task {} of {} to task {}'.format(ThisTask, Ntasks, Ntasks-1))
-#                    sys.stdout.flush()
-#                    cell_upper = crust_thistask[i+1,j]
-#                    cell_lower = crust_thistask[i-1,j]
-#                elif ((j+1) > index_high):
-#                    cell_left = crust_thistask[i,j-1]
-#                    cell_right = comm.irecv(source = 1, tag = 1)
-#                    print('Right cell received at task {} of {} from task {}'.format(ThisTask, Ntasks, 1))
-#                    sys.stdout.flush()
-#                    comm.isend(crust_thistask[i,j], dest = 1, tag = 0) 
-#                    print('Left cell sent from task {} of {} to task {}'.format(ThisTask, Ntasks, 1))
-#                    sys.stdout.flush()
-#                    cell_upper = crust_thistask[i+1,j]
-#                    cell_lower = crust_thistask[i-1,j]
-#
-#                crust_thistask[i,j] = crust_thistask[i,j] + dt * alpha * \
-#                                      ( (cell_upper + cell_lower - 2 * crust_thistask[i,j] ) / ad**2 + \
-#                                      (cell_right + cell_left - 2 * crust_thistask[i,j]) / al**2 )        
 
-#
-#    if (ThisTask == 0 ):
-#        print('index_low, index_high = ', index_low,index_high)
-#        sys.stdout.flush()
-#        for row in 
-#
-#        for i in range(1, Ntasks):
-#            print('index_low, index_high = {},{}'.format( index_low+(i*del_index),index_high+(i*del_index)))
-#            sys.stdout.flush()
-#            #print('Shape of crust sent = {}'.format(np.shape(crust[:, index_low+(i*del_index) : index_high+(i*del_index)])))
-#            print('size of data sent in bytes  = {}'.format(sys.getsizeof(crust[:, index_low+(i*del_index) : index_high+(i*del_index)])))
-#            sys.stdout.flush()
-#            comm.isend(crust[:, index_low+(i*del_index) : index_high+(i*del_index)].copy(), dest = i, tag = i)
-#            
-#    else:
-#        #crust_thistask = np.full((Nd, del_index),0, dtype = 'float')
-#        #print('Size of crust_thistask in bytes = {}'.format(sys.getsizeof(crust_thistask)))
-#        #sys.stdout.flush()
-#        crust_thistask = comm.irecv(source = 0, tag = ThisTask)
-#        print('NON-zero elemenst in crust_thistask is {} in task {} = '.format(np.count_nonzero(crust_thistask),ThisTask))
-#        sys.stdout.flush()
-#        print('size of data received in bytes  = {}'.format(sys.getsizeof(crust_thistask)))
-#        sys.stdout.flush()
-#            
+           
